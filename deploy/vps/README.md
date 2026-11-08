@@ -28,7 +28,7 @@ claude mcp add --scope user --transport http umami https://analytics.yottabeacon
 
 ## Recording retention
 
-The `retention` service permanently deletes `session_replay` and `heatmap_event` rows older than 30 days, for all websites. It runs when the container starts and then every 24 hours, and because it's part of this compose file, it survives restarts and updates. Page views and events are never touched.
+The `retention` service permanently deletes `session_replay` and `heatmap_event` rows older than 30 days, for all websites, and older than 7 days for GoFlock, whose privacy page promises that. It runs when the container starts and then every 24 hours, and because it's part of this compose file, it survives restarts and updates. Page views and events are never touched.
 
 A saved replay is only a name attached to a recording, so saving doesn't extend the 30 days. When the recording is deleted, the job removes the saved name too.
 
