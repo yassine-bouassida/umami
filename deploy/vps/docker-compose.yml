@@ -34,7 +34,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  # Deletes session recordings and heatmap data after 30 days, on start and then daily.
+  # Deletes session recordings and heatmap data after 30 days (GoFlock: 7), on start and then daily.
   # A saved replay is only a label on a recording, so it goes when the recording does.
   # Page views and events are kept.
   retention:
@@ -54,6 +54,9 @@ services:
         BEGIN;
         DELETE FROM session_replay WHERE coalesce(created_at, ended_at) < now() - interval '30 days';
         DELETE FROM heatmap_event WHERE created_at < now() - interval '30 days';
+        -- GoFlock (private group chat) promises 7 days on its privacy page.
+        DELETE FROM session_replay WHERE website_id = '9f1db49b-4f0e-4442-b2e7-51a5ac926a88' AND coalesce(created_at, ended_at) < now() - interval '7 days';
+        DELETE FROM heatmap_event WHERE website_id = '9f1db49b-4f0e-4442-b2e7-51a5ac926a88' AND created_at < now() - interval '7 days';
         DELETE FROM session_replay_saved s WHERE NOT EXISTS (
           SELECT 1 FROM session_replay r WHERE r.website_id = s.website_id AND r.visit_id = s.visit_id
         );
