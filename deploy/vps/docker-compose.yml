@@ -1,11 +1,9 @@
 ---
-# Umami on the Hostinger VPS, built from this fork's source.
+# Umami on the Hostinger VPS, using the image .github/workflows/vps-image.yml builds from this fork.
 # Secrets come from the project's environment (see .env.example), never from this file.
 services:
   umami:
-    build:
-      context: https://github.com/yassine-bouassida/umami.git#${UMAMI_GIT_REF:-master}
-    image: umami-fork:latest
+    image: ghcr.io/yassine-bouassida/umami:${UMAMI_IMAGE_TAG:-master}
     environment:
       DATABASE_URL: postgresql://umami:${POSTGRES_PASSWORD}@db:5432/umami
       APP_SECRET: ${APP_SECRET}
