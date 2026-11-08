@@ -1,0 +1,54 @@
+---
+# Umami on the Hostinger VPS, built from this fork's source.
+# Secrets come from the project's environment (see .env.example), never from this file.
+services:
+  umami:
+    build:
+      context: https://github.com/yassine-bouassida/umami.git#${UMAMI_GIT_REF:-master}
+    image: umami-fork:latest
+    environment:
+      DATABASE_URL: postgresql://umami:${POSTGRES_PASSWORD}@db:5432/umami
+      APP_SECRET: ${APP_SECRET}
+      TWO_FACTOR_ENCRYPTION_KEY: ${TWO_FACTOR_ENCRYPTION_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    init: true
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/heartbeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  # HTTPS in front of Umami; Caddy gets and renews the certificate for UMAMI_HOST.
+  caddy:
+    image: caddy:2
+    command: caddy reverse-proxy --from ${UMAMI_HOST} --to umami:3000
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - umami
+    restart: always
+volumes:
+  umami-db-data:
+  caddy-data:
+  caddy-config:
