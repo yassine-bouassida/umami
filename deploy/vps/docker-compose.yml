@@ -8,6 +8,8 @@ services:
       DATABASE_URL: postgresql://umami:${POSTGRES_PASSWORD}@db:5432/umami
       APP_SECRET: ${APP_SECRET}
       TWO_FACTOR_ENCRYPTION_KEY: ${TWO_FACTOR_ENCRYPTION_KEY}
+      # Serves the read-only MCP endpoint at /mcp (needs an Umami API key)
+      MCP_ENABLED: "1"
     depends_on:
       db:
         condition: service_healthy
@@ -32,10 +34,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  # HTTPS in front of Umami; Caddy gets and renews the certificate for UMAMI_HOST.
+  # HTTPS in front of Umami; Caddy gets and renews a certificate for each host in UMAMI_HOST.
+  # The Caddyfile is generated at start because Hostinger's Docker manager can't mount files.
   caddy:
     image: caddy:2
-    command: caddy reverse-proxy --from ${UMAMI_HOST} --to umami:3000
+    environment:
+      UMAMI_HOST: ${UMAMI_HOST}
+    command:
+      - sh
+      - -c
+      - printf '%s {\n\treverse_proxy umami:3000\n}\n' "$$UMAMI_HOST" > /etc/caddy/Caddyfile && exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
     ports:
       - "80:80"
       - "443:443"
