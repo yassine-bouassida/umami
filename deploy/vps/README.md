@@ -26,6 +26,14 @@ claude mcp add --scope user --transport http umami https://analytics.yottabeacon
 2. Start the build and wait for it to finish: `gh workflow run vps-image.yml -R yassine-bouassida/umami --ref master`
 3. Update the `umami` Docker project on the VPS so it pulls the new image (Hostinger hPanel → VPS → Docker Manager → Update, or the Hostinger API's update-project call). Volumes, and so the data, are kept.
 
+## Recording retention
+
+The `retention` service permanently deletes `session_replay` and `heatmap_event` rows older than 30 days, for all websites. It runs when the container starts and then every 24 hours, and because it's part of this compose file, it survives restarts and updates. Page views and events are never touched.
+
+A saved replay is only a name attached to a recording, so saving doesn't extend the 30 days. When the recording is deleted, the job removes the saved name too.
+
+To check it, open the `retention` logs in Hostinger's Docker Manager. Each run prints a `retention run <time>` line and how many rows it deleted, or `retention run FAILED`. Nothing alerts anyone on failure, so look at these occasionally. YottaBeacon's privacy notice promises this 30-day limit, so don't remove or change the service without updating that notice.
+
 ## Syncing with upstream
 
 ```bash

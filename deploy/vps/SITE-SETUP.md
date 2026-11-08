@@ -38,7 +38,7 @@ Event names can be defined before the site sends them, so goals and funnels can 
 4. **Revenue:** if the site takes payments, send `umami.track('purchase', { revenue: 49, currency: 'USD' })`.
 5. **Private areas:** add `data-umami-block` to anything recordings must never capture, such as forms, chat panels and anything showing personal data. Strict masking doesn't cover attributes, so a private link's `href`, for example, needs the block too. Heatmaps still record click positions in blocked areas, but no text.
 6. **Campaigns:** use UTM tags on links the project shares.
-7. **Privacy page:** name Umami, the VPS host, and each feature in use, including session recordings and heatmaps. Have the owner decide whether recordings need a consent banner where the site's visitors are.
+7. **Privacy page:** name Umami, the VPS host, and each feature in use, including session recordings and heatmaps. State that recordings and heatmap data are deleted after 30 days; the `retention` service does this for every site (see `README.md`), and saved replays get no exception. Have the owner decide whether recordings need a consent banner where the site's visitors are.
 8. **Content-Security-Policy:** if the site has one, allow `https://analytics.yottabeacon.com` in `script-src` and `connect-src`.
 
 ## Checks
